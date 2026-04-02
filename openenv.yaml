@@ -1,0 +1,16 @@
+spec_version: 1
+name: android-ransomware-detection
+type: space
+runtime: fastapi
+app: server.app:app
+port: 8000
+tasks:
+  - id: "swift_identification"
+    name: "Swift Identification"
+    description: "Score based on how quickly the agent flags the malicious PID."
+  - id: "minimal_collateral"
+    name: "Minimal Collateral Damage"
+    description: "Score penalizes the agent for killing benign Android system or user processes."
+  - id: "prevention"
+    name: "Prevention"
+    description: "Score based on the percentage of simulated user files saved from encryption."
