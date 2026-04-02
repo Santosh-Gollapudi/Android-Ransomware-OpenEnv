@@ -1,15 +1,11 @@
 try:
     from openenv.core.env_server.http_server import create_app
 except Exception as e:
-    raise ImportError(
-        "openenv is required for the web interface. Install dependencies with '\n    uv sync\n'"
-    ) from e
+    raise ImportError("openenv-core is required.") from e
 
-# Directly import from the models.py file in the main folder
 from models import Action, Observation
 from server.ransomware_env_environment import RansomwareEnvironment
 
-# Create the app with web interface
 app = create_app(
     RansomwareEnvironment,
     Action,        
