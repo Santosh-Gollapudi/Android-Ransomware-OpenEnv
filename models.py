@@ -130,8 +130,7 @@ class ProcessInfo(BaseModel):
     )
 
     class Config:
-        # Expose the field in serialised output but mark it as internal-only
-        # in documentation; agent prompts should note this field is grader-only.
+       
         json_schema_extra = {
             "x-agent-hidden": ["suspicion_score"],
         }
@@ -182,19 +181,16 @@ class Observation(BaseModel):
     max_steps           : int             = Field(...,         description="Episode length before forced termination.")
     timestamp_sim       : int             = Field(...,         description="Simulated Unix timestamp at step start.")
 
-    # ---- Process table ----
     processes           : List[ProcessInfo] = Field(
         ...,
         description="All currently running (or recently killed) processes on the device.",
     )
 
-    # ---- Filesystem ----
     filesystem          : List[FileInfo]  = Field(
         ...,
         description="User files on /sdcard/ — the ransomware's target.",
     )
 
-    # ---- Summary counters ----
     total_user_files    : int   = Field(..., ge=0, description="Total number of user files in the episode.")
     encrypted_file_count: int   = Field(..., ge=0, description="Files that have been encrypted so far.")
     quarantined_file_count: int = Field(..., ge=0, description="Files the agent has quarantined.")
@@ -203,7 +199,6 @@ class Observation(BaseModel):
         description="Files that are still INTACT (neither encrypted nor quarantined but still accessible).",
     )
 
-    # ---- Alerts ----
     system_alerts       : List[str] = Field(
         default_factory=list,
         description=(
@@ -216,7 +211,6 @@ class Observation(BaseModel):
         description="True if the agent has successfully called alert_user this episode.",
     )
 
-    # ---- Episode terminal signal ----
     done                : bool  = Field(False, description="True when the episode has ended.")
     reward              : float = Field(0.0,   description="Reward earned on the PREVIOUS step.")
 
