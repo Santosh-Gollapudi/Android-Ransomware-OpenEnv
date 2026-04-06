@@ -1,15 +1,11 @@
 try:
     from openenv.core.env_server.http_server import create_app
 except Exception as e:
-    raise ImportError(
-        "openenv is required for the web interface. Install dependencies with '\n    uv sync\n'"
-    ) from e
+    raise ImportError("openenv-core is required.") from e
 
-# Directly import from the models.py file in the main folder
 from models import Action, Observation
 from server.ransomware_env_environment import RansomwareEnvironment
 
-# Create the app with web interface
 app = create_app(
     RansomwareEnvironment,
     Action,        
@@ -18,13 +14,13 @@ app = create_app(
     max_concurrent_envs=1, 
 )
 
-def main(host: str = "0.0.0.0", port: int = 8000):
+def main():
     import uvicorn
-    uvicorn.run(app, host=host, port=port)
-
-if __name__ == "__main__":
     import argparse
     parser = argparse.ArgumentParser()
-    parser.add_argument("--port", type=int, default=8000)
+    parser.add_argument(--port, type=int, default=8000)
     args = parser.parse_args()
-    main(port=args.port)
+    uvicorn.run(app, host="0.0.0.0", port=args.port)
+
+if __name__ == '__main__':
+    main()
