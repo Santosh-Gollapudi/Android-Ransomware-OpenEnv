@@ -42,10 +42,10 @@ class ActionType(str, Enum):
     Using str-based Enum ensures JSON serialisation works without custom encoders
     and allows LLMs to emit the action name as a plain string.
     """
-    MONITOR_PROCESS  = "monitor_process"   # gather extra telemetry on a PID
-    KILL_PROCESS     = "kill_process"       # terminate a process by PID
-    QUARANTINE_FILE  = "quarantine_file"    # isolate a file from the filesystem
-    ALERT_USER       = "alert_user"         # trigger a user-visible security alert
+    MONITOR_PROCESS  = "monitor_process"  
+    KILL_PROCESS     = "kill_process"       
+    QUARANTINE_FILE  = "quarantine_file"    
+    ALERT_USER       = "alert_user"        
 
 
 class ProcessStatus(str, Enum):
@@ -54,7 +54,7 @@ class ProcessStatus(str, Enum):
     Processes transition:  RUNNING → MONITORED (optional) → KILLED
     """
     RUNNING    = "running"
-    MONITORED  = "monitored"   # agent has called monitor_process on this PID
+    MONITORED  = "monitored"   
     KILLED     = "killed"
 
 
@@ -63,8 +63,8 @@ class FileStatus(str, Enum):
     Tracks whether a user file is intact, encrypted by ransomware, or quarantined.
     """
     INTACT       = "intact"
-    ENCRYPTED    = "encrypted"   # ransomware has processed this file
-    QUARANTINED  = "quarantined" # agent has moved file to sandbox
+    ENCRYPTED    = "encrypted"  
+    QUARANTINED  = "quarantined" 
 
 
 # ---------------------------------------------------------------------------
@@ -130,7 +130,7 @@ class ProcessInfo(BaseModel):
     )
 
     class Config:
-       
+        
         json_schema_extra = {
             "x-agent-hidden": ["suspicion_score"],
         }
