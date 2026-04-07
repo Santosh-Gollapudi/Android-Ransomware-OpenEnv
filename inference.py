@@ -1,14 +1,28 @@
 import os
-import requests
+import urllib.request
+import urllib.error
+import json
 
 URL = os.getenv("OPENENV_URL", "http://localhost:7860")
+
+def send_post_request(endpoint, payload=None):
+    url = f"{URL}{endpoint}"
+    data = json.dumps(payload).encode('utf-8') if payload else None
+    headers = {'Content-Type': 'application/json'} if payload else {}
+    
+    req = urllib.request.Request(url, data=data, headers=headers, method='POST')
+    try:
+        with urllib.request.urlopen(req) as response:
+            return json.loads(response.read().decode('utf-8'))
+    except urllib.error.URLError as e:
+        print(f"Request failed: {e}")
+        raise
 
 def run_inference():
     print(f"Connecting to environment at {URL}...")
     try:
         print("Sending /reset...")
-        reset_res = requests.post(f"{URL}/reset")
-        reset_res.raise_for_status()
+        reset_res = send_post_request("/reset")
         print("Reset successful!")
 
         sample_action = {
@@ -17,12 +31,11 @@ def run_inference():
         }
         
         print("Sending /step...")
-        step_res = requests.post(f"{URL}/step", json=sample_action)
-        step_res.raise_for_status()
-        print("Step successful! Reward earned:", step_res.json().get("reward"))
+        step_res = send_post_request("/step", payload=sample_action)
+        print("Step successful! Reward earned:", step_res.get("reward"))
         
     except Exception as e:
         print(f"Inference script stopped: {e}")
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     run_inference()
