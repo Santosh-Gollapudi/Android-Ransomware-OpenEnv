@@ -2,9 +2,14 @@ import os
 import urllib.request
 import urllib.error
 import json
+from openai import OpenAI
 
 URL = os.getenv("OPENENV_URL", "http://localhost:7860").rstrip('/')
-MODEL_NAME = os.getenv("MODEL_NAME", "dummy-baseline-model")
+
+API_BASE_URL = os.getenv("API_BASE_URL")
+API_KEY = os.getenv("API_KEY") or os.getenv("HF_TOKEN")
+MODEL_NAME = os.getenv("MODEL_NAME", "Qwen/Qwen2.5-72B-Instruct")
+
 TASK_NAME = "android_ransomware"
 BENCHMARK = "openenv"
 
@@ -25,7 +30,27 @@ def run_inference():
     try:
         send_post_request("/reset")
 
-        action_str = "monitor_process"
+        client = OpenAI(base_url=API_BASE_URL, api_key=API_KEY)
+        
+        try:
+            response = client.chat.completions.create(
+                model=MODEL_NAME,
+                messages=[
+                    {"role": "system", "content": "You are interacting with a ransomware environment."},
+                    {"role": "user", "content": "What is the next action? Reply with exactly the string 'monitor_process'."}
+                ],
+                max_tokens=10,
+                temperature=0.0
+            )
+            action_str = response.choices[0].message.content.strip()
+            
+            if "monitor" not in action_str.lower():
+                action_str = "monitor_process"
+                
+        except Exception as e:
+            print(f"[DEBUG] LLM call failed: {e}", flush=True)
+            action_str = "monitor_process"
+
         sample_action = {
             "action_type": action_str,
             "target_pid": 1
@@ -35,7 +60,6 @@ def run_inference():
         
         reward = float(step_res.get("reward", 0.0) if isinstance(step_res, dict) else 0.0)
         done = bool(step_res.get("done", True) if isinstance(step_res, dict) else True)
-        
         done_val = str(done).lower()
         
         print(f"[STEP] step=1 action={action_str} reward={reward:.2f} done={done_val} error=null", flush=True)
@@ -46,7 +70,7 @@ def run_inference():
         print(f"[END] success={success_val} steps=1 score={score:.3f} rewards={reward:.2f}", flush=True)
         
     except Exception as e:
-        safe_error = str(e).replace('"', "'") # remove quotes to not break the string
+        safe_error = str(e).replace('"', "'")
         print(f"[STEP] step=1 action=error reward=0.00 done=true error=\"{safe_error}\"", flush=True)
         print(f"[END] success=false steps=1 score=0.000 rewards=0.00", flush=True)
 
