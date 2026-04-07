@@ -3,7 +3,7 @@ import urllib.request
 import urllib.error
 import json
 
-URL = os.getenv("OPENENV_URL", "http://localhost:7860")
+URL = os.getenv("OPENENV_URL", "http://localhost:7860").rstrip('/')
 
 def send_post_request(endpoint, payload=None):
     url = f"{URL}{endpoint}"
@@ -12,7 +12,7 @@ def send_post_request(endpoint, payload=None):
     
     req = urllib.request.Request(url, data=data, headers=headers, method='POST')
     try:
-        with urllib.request.urlopen(req) as response:
+        with urllib.request.urlopen(req, timeout=15) as response:
             return json.loads(response.read().decode('utf-8'))
     except urllib.error.URLError as e:
         print(f"Request failed: {e}")
@@ -32,10 +32,12 @@ def run_inference():
         
         print("Sending /step...")
         step_res = send_post_request("/step", payload=sample_action)
-        print("Step successful! Reward earned:", step_res.get("reward"))
+        
+        reward = step_res.get("reward") if isinstance(step_res, dict) else "No reward data"
+        print("Step successful! Reward earned:", reward)
         
     except Exception as e:
-        print(f"Inference script stopped: {e}")
+        print(f"Inference script stopped gracefully: {e}")
 
 if __name__ == '__main__':
     run_inference()
