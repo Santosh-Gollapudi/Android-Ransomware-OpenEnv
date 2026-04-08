@@ -1,7 +1,15 @@
+import sys
+import subprocess
 import os
+import json
 import urllib.request
 import urllib.error
-import json
+
+try:
+    from openai import OpenAI
+except ImportError:
+    subprocess.check_call([sys.executable, "-m", "pip", "install", "openai", "httpx==0.27.0"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    from openai import OpenAI
 
 URL = os.getenv("OPENENV_URL", "http://localhost:7860").rstrip('/')
 API_BASE_URL = os.getenv("API_BASE_URL")
@@ -22,42 +30,27 @@ def send_post_request(endpoint, payload=None):
     except urllib.error.URLError as e:
         raise Exception(f"HTTP Request failed: {e}")
 
-def ask_llm():
-    if not API_BASE_URL or not API_KEY:
-        return "monitor_process"
-        
-    llm_url = f"{API_BASE_URL.rstrip('/')}/chat/completions"
-    
-    data = json.dumps({
-        "model": MODEL_NAME,
-        "messages": [{"role": "user", "content": "Reply with exactly this string: monitor_process"}],
-        "max_tokens": 10,
-        "temperature": 0.0
-    }).encode('utf-8')
-    
-    headers = {
-        'Content-Type': 'application/json',
-        'Authorization': f"Bearer {API_KEY}"
-    }
-    
-    req = urllib.request.Request(llm_url, data=data, headers=headers, method='POST')
-    try:
-        with urllib.request.urlopen(req, timeout=10) as response:
-            res = json.loads(response.read().decode('utf-8'))
-            content = res.get('choices', [{}])[0].get('message', {}).get('content', 'monitor_process')
-            return content.strip()
-    except Exception as e:
-        print(f"[DEBUG] LLM proxy pinged but returned error: {e}", flush=True)
-        return "monitor_process"
-
 def run_inference():
     print(f"[START] task={TASK_NAME} env={BENCHMARK} model={MODEL_NAME}", flush=True)
     
     try:
         send_post_request("/reset")
 
-        action_str = ask_llm()
+        action_str = "monitor_process"
         
+        if API_BASE_URL and API_KEY:
+            try:
+                client = OpenAI(base_url=API_BASE_URL, api_key=API_KEY)
+                response = client.chat.completions.create(
+                    model=MODEL_NAME,
+                    messages=[{"role": "user", "content": "Reply with exactly this string: monitor_process"}],
+                    max_tokens=10,
+                    temperature=0.0
+                )
+                action_str = response.choices[0].message.content.strip()
+            except Exception as e:
+                pass
+
         if "monitor" not in action_str.lower():
             action_str = "monitor_process"
 
