@@ -78,4 +78,4 @@ def run_inference():
         print(f"[END] success=false steps=1 score=0.000 rewards=0.00", flush=True)
 
 if __name__ == '__main__':
-    run_inference()
+    run_inference() 
