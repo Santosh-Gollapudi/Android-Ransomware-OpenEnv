@@ -3,6 +3,7 @@ from openenv.core.env_server import Environment
 from openenv.core.client_types import StepResult
 from models import AndroidAction, AndroidObservation, AndroidState
 
+
 class AndroidRansomwareEnvironment(Environment[AndroidAction, AndroidObservation, AndroidState]):
     def __init__(self):
         super().__init__()
@@ -16,7 +17,7 @@ class AndroidRansomwareEnvironment(Environment[AndroidAction, AndroidObservation
         self.step_count = 0
         self.total_reward = 0.0
         self.is_compromised = False
-        
+
         return AndroidObservation(
             cpu_usage_percent=12.5,
             unauthorized_encryption_flags=0,
@@ -29,7 +30,7 @@ class AndroidRansomwareEnvironment(Environment[AndroidAction, AndroidObservation
         self.step_count += 1
         reward = 0.0
         done = False
-        
+
         cpu_usage = 15.0
         encryption_flags = 0
         suspicious_calls = []
@@ -41,7 +42,7 @@ class AndroidRansomwareEnvironment(Environment[AndroidAction, AndroidObservation
             suspicious_calls = ["crypto.Cipher.getInstance", "java.io.File.renameTo"]
             self.is_compromised = True
             log += " THREAT: Rapid encryption and CPU spike detected."
-            
+
         elif action.action_type == "BLOCK_PROCESS":
             if self.is_compromised:
                 reward = 1.0
@@ -50,7 +51,7 @@ class AndroidRansomwareEnvironment(Environment[AndroidAction, AndroidObservation
                 reward = -1.0
                 log += " ERROR: Blocked benign process."
             done = True
-            
+
         if self.step_count >= 10:
             done = True
 
