@@ -20,6 +20,9 @@ The agent must monitor running processes, identify the malicious payload (`com.m
 2. **Minimal Collateral Damage**: Penalizes killing benign system/user processes.
 3. **Prevention**: Evaluates the percentage of the `/sdcard/` filesystem saved from AES-256 encryption.
 
+## Results
+<img width="1919" height="1079" alt="Screenshot 2026-04-26 091830" src="https://github.com/user-attachments/assets/91df9731-b39e-40a0-98db-d854318f6696" />
+
 ## Tech Stack
 * **Framework:** OpenEnv Core
 * **Schemas:** Pydantic Action/Observation spaces.
